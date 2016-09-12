@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import sys
 
 import evdev
@@ -57,16 +58,23 @@ def list_devices():
 		print("%s %s" % (dev.fn, dev.name))
 
 def main():
-	if len(sys.argv) < 2:
-		list_devices()
-		sys.exit(1)
+	parser = argparse.ArgumentParser(description="Virtual MIDI keyboard")
+	parser.add_argument('device', nargs='?', help="Evdev input device")
+	parser.add_argument('-l', dest='list', action='store_true', help="List input devices and quit")
+	args = parser.parse_args()
 
-	dev_path = sys.argv[1]
+	if args.list:
+		list_devices()
+		sys.exit(0)
+
+	if args.device is None:
+		parser.print_help()
+		sys.exit(1)
 
 	midiout = rtmidi.MidiOut()
 	midiout.open_virtual_port("PyMIDIK")
 
-	dev = evdev.InputDevice(dev_path)
+	dev = evdev.InputDevice(args.device)
 
 	for ev in dev.read_loop():
 		if ev.type == evdev.ecodes.EV_KEY:
