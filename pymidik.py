@@ -61,6 +61,7 @@ def main():
 	parser = argparse.ArgumentParser(description="Virtual MIDI keyboard")
 	parser.add_argument('device', nargs='?', help="Evdev input device")
 	parser.add_argument('-l', dest='list', action='store_true', help="List input devices and quit")
+	parser.add_argument('-n', '--port-name', dest='port_name', default="PyMIDIK", help="MIDI output port name")
 	args = parser.parse_args()
 
 	if args.list:
@@ -72,7 +73,7 @@ def main():
 		sys.exit(1)
 
 	midiout = rtmidi.MidiOut()
-	midiout.open_virtual_port("PyMIDIK")
+	midiout.open_virtual_port(args.port_name)
 
 	dev = evdev.InputDevice(args.device)
 
