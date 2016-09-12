@@ -57,6 +57,12 @@ def list_devices():
 	for dev in devs:
 		print("%s %s" % (dev.fn, dev.name))
 
+def parse_channel(string):
+	val = int(string)
+	if val < 1 or val > 16:
+		raise argparse.ArgumentTypeError("Invalid channel number %r" % string)
+	return val - 1
+
 def main():
 	parser = argparse.ArgumentParser(description="Virtual MIDI keyboard")
 
@@ -70,6 +76,9 @@ def main():
 
 	parser.add_argument('-n', '--port-name', help="MIDI output port name",
 		dest='port_name', default="PyMIDIK")
+
+	parser.add_argument('-c', '--channel', help="MIDI channel number (1-16)",
+		dest='channel', type=parse_channel, default=0)
 
 	args = parser.parse_args()
 
@@ -91,11 +100,11 @@ def main():
 			if ev.value == 1:
 				note = key_code_to_midi_note(ev.code)
 				if note is not None:
-					midiout.send_message([midiconstants.NOTE_ON, note, 127])
+					midiout.send_message([midiconstants.NOTE_ON + args.channel, note, 127])
 			elif ev.value == 0:
 				note = key_code_to_midi_note(ev.code)
 				if note is not None:
-					midiout.send_message([midiconstants.NOTE_OFF, note, 0])
+					midiout.send_message([midiconstants.NOTE_OFF + args.channel, note, 0])
 
 if __name__ == '__main__':
 	main()
