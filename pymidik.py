@@ -70,6 +70,12 @@ def parse_channel(string):
 		raise argparse.ArgumentTypeError("Invalid channel number %r" % string)
 	return val - 1
 
+def parse_transpose(string):
+	val = int(string)
+	if val <= -127 or val >= 127:
+		raise argparse.ArgumentTypeError("Invalid transpose amount %r" % string)
+	return val
+
 def main():
 	parser = argparse.ArgumentParser(description="Virtual MIDI keyboard")
 
@@ -89,6 +95,9 @@ def main():
 
 	parser.add_argument('-c', '--channel', help="MIDI channel number (1-16)",
 		dest='channel', type=parse_channel, default=0)
+
+	parser.add_argument('-t', '--transpose', help="Transpose MIDI notes by amount (+/- 0-126)",
+		dest='transpose', type=parse_transpose, default=0)
 
 	args = parser.parse_args()
 
@@ -122,11 +131,19 @@ def main():
 			if ev.value == 1:
 				note = key_code_to_midi_note(ev.code)
 				if note is not None:
-					midiout.send_message([midiconstants.NOTE_ON + args.channel, note, 127])
+					midiout.send_message([
+						midiconstants.NOTE_ON + args.channel,
+						(note + args.transpose) % 127,
+						127
+					])
 			elif ev.value == 0:
 				note = key_code_to_midi_note(ev.code)
 				if note is not None:
-					midiout.send_message([midiconstants.NOTE_OFF + args.channel, note, 0])
+					midiout.send_message([
+						midiconstants.NOTE_OFF + args.channel,
+						(note + args.transpose) % 127,
+						0
+					])
 
 if __name__ == '__main__':
 	main()
