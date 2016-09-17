@@ -78,7 +78,7 @@ def main():
 		nargs='?')
 
 	parser.add_argument(
-		'-l', help="List MIDI input ports, input devices and quit",
+		'-l', '--list', help="List MIDI input ports, input devices and quit",
 		dest='list', action='store_true')
 
 	parser.add_argument('-n', '--port-name', help="MIDI output port name",
