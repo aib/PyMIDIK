@@ -52,10 +52,17 @@ def key_code_to_midi_note(code):
 	except KeyError:
 		return None
 
-def list_devices():
+def list_ports_and_devices():
+	print("MIDI input ports:")
+	with rtmidi.MidiOut() as mo:
+		ports = mo.get_ports()
+	for port in ports:
+		print("    %s" % (port,))
+
+	print("Devices:")
 	devs = [evdev.InputDevice(fn) for fn in evdev.list_devices()]
 	for dev in devs:
-		print("%s %s" % (dev.fn, dev.name))
+		print("    %s %s" % (dev.fn, dev.name))
 
 def parse_channel(string):
 	val = int(string)
@@ -71,7 +78,7 @@ def main():
 		nargs='?')
 
 	parser.add_argument(
-		'-l', help="List input devices and quit",
+		'-l', help="List MIDI input ports, input devices and quit",
 		dest='list', action='store_true')
 
 	parser.add_argument('-n', '--port-name', help="MIDI output port name",
@@ -83,7 +90,7 @@ def main():
 	args = parser.parse_args()
 
 	if args.list:
-		list_devices()
+		list_ports_and_devices()
 		sys.exit(0)
 
 	if args.device is None:
