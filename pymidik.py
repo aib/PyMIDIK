@@ -81,8 +81,11 @@ def main():
 		'-l', '--list', help="List MIDI input ports, input devices and quit",
 		dest='list', action='store_true')
 
-	parser.add_argument('-n', '--port-name', help="MIDI output port name",
+	parser.add_argument('-n', '--port-name', help="MIDI output port name to create",
 		dest='port_name', default="PyMIDIK")
+
+	parser.add_argument('-o', '--connect', help="MIDI input port to connect to",
+		dest='connect_port')
 
 	parser.add_argument('-c', '--channel', help="MIDI channel number (1-16)",
 		dest='channel', type=parse_channel, default=0)
@@ -98,7 +101,19 @@ def main():
 		sys.exit(1)
 
 	midiout = rtmidi.MidiOut()
-	midiout.open_virtual_port(args.port_name)
+
+	if args.connect_port is None:
+		midiout.open_virtual_port(args.port_name)
+		print("Opened virtual port \"%s\"" % (args.port_name,))
+	else:
+		ports = list(filter(lambda p: p[1].startswith(args.connect_port), enumerate(midiout.get_ports())))
+		if len(ports) == 0:
+			print("No MIDI input ports found matching \"%s\"" % (args.connect_port,))
+			sys.exit(3)
+		else:
+			port = ports[0]
+			midiout.open_port(port[0])
+			print("Connected to port \"%s\"" % (port[1]))
 
 	dev = evdev.InputDevice(args.device)
 
