@@ -46,6 +46,8 @@ keyMap = {
 	kcodes['KEY_M']: 71
 }
 
+args = None
+
 def key_code_to_midi_note(code):
 	try:
 		return keyMap[code]
@@ -76,6 +78,11 @@ def parse_transpose(string):
 		raise argparse.ArgumentTypeError("Invalid transpose amount %r" % string)
 	return val
 
+def _send_message(port, msg):
+	if args.verbose:
+		print("Sent", msg)
+	port.send_message(msg)
+
 def main():
 	parser = argparse.ArgumentParser(description="Virtual MIDI keyboard")
 
@@ -99,6 +106,10 @@ def main():
 	parser.add_argument('-t', '--transpose', help="Transpose MIDI notes by amount (+/- 0-126)",
 		dest='transpose', type=parse_transpose, default=0)
 
+	parser.add_argument('-v', '--verbose', help="Print MIDI messages",
+		dest='verbose', action='store_true')
+
+	global args
 	args = parser.parse_args()
 
 	if args.list:
@@ -131,7 +142,7 @@ def main():
 			if ev.value == 1:
 				note = key_code_to_midi_note(ev.code)
 				if note is not None:
-					midiout.send_message([
+					_send_message(midiout, [
 						midiconstants.NOTE_ON + args.channel,
 						(note + args.transpose) % 127,
 						127
@@ -139,7 +150,7 @@ def main():
 			elif ev.value == 0:
 				note = key_code_to_midi_note(ev.code)
 				if note is not None:
-					midiout.send_message([
+					_send_message(midiout, [
 						midiconstants.NOTE_OFF + args.channel,
 						(note + args.transpose) % 127,
 						0
