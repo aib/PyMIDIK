@@ -106,6 +106,9 @@ def main():
 	parser.add_argument('-t', '--transpose', help="Transpose MIDI notes by amount (+/- 0-126)",
 		dest='transpose', type=parse_transpose, default=0)
 
+	parser.add_argument('-g', '--grab', help="Grab input device, swallow input events",
+		dest='grab', action='store_true')
+
 	parser.add_argument('-v', '--verbose', help="Print MIDI messages",
 		dest='verbose', action='store_true')
 
@@ -137,6 +140,9 @@ def main():
 
 	dev = evdev.InputDevice(args.device)
 
+	if args.grab:
+		dev.grab()
+
 	for ev in dev.read_loop():
 		if ev.type == evdev.ecodes.EV_KEY:
 			if ev.value == 1:
@@ -155,6 +161,8 @@ def main():
 						(note + args.transpose) % 127,
 						0
 					])
+	if args.grab:
+		dev.ungrab()
 
 if __name__ == '__main__':
 	main()
