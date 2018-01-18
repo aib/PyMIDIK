@@ -143,8 +143,16 @@ def main():
 	if args.grab:
 		dev.grab()
 
+	ctrl_down = False
 	for ev in dev.read_loop():
 		if ev.type == evdev.ecodes.EV_KEY:
+			if ev.code == ecodes.KEY_LEFTCTRL:
+				ctrl_down = ev.value != 0
+			elif ev.code == ecodes.KEY_C:
+				if ctrl_down:
+					print("^C detected, exiting")
+					break
+
 			if ev.value == 1:
 				note = key_code_to_midi_note(ev.code)
 				if note is not None:
