@@ -150,8 +150,9 @@ def main():
 				ctrl_down = ev.value != 0
 			elif ev.code == ecodes.KEY_C:
 				if ctrl_down:
-					print("^C detected, exiting")
-					break
+					if args.grab:
+						print("^C detected, exiting")
+						break
 
 			if ev.value == 1:
 				note = key_code_to_midi_note(ev.code)
